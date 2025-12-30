@@ -1,0 +1,293 @@
+--- START OF CSE480_591_Project_Report_Template__2_ (3).pdf ---
+YEDITEPE UNIVERSITY
+Faculty of Engineering
+Department of Computer Engineering
+Term Project Report
+CSE480/591: Optimization with Metaheuristics
+Student Name:Atahan D¨ uryaz,Derin Ta¸ skın
+Student ID:20220702085
+Date:November 23, 2025
+Project Title:
+Solving the Traveling Salesman Problem using Metaheuristic Approaches
+Instructor:Asst. Prof. Dr. Gizem S¨ ung¨ u Terci
+Fall 2025 Semester
+CSE480/591 - Optimization with Metaheuristics Yeditepe University
+1. Selected Problem and Motivation
+The selected optimization problem for this project is theTraveling Salesman Prob-
+lem (TSP). The TSP is one of the most studied NP-hard combinatorial optimization
+problems in operations research and computer science. The core objective is to determine
+the shortest possible route that visits a specific set of cities exactly once and returns to
+the origin city.
+The motivation for selecting the TSP lies in its theoretical significance and its wide
+range of real-world applications.
+•Real-World Relevance:Variations of the TSP are fundamental to logistics (ve-
+hicle routing), manufacturing (drilling of printed circuit boards), and telecommu-
+nications (Talbi, 2009).
+•Computational Complexity:As the number of cities (n) increases, the search
+space grows factorially (n!), rendering exact methods like brute-force or simple
+branch-and-bound computationally expensive or infeasible for large-scale instances.
+•Benchmark Standard:The TSP serves as a standard benchmark for evaluating
+the performance of new metaheuristic algorithms.
+Consequently, this project aims to exploremetaheuristicapproaches (e.g., Evolutionary
+Algorithms or Swarm Intelligence) to find near-optimal solutions efficiently, rather than
+relying on exact methods or simple greedy heuristics.
+2. Formal Problem Definition
+Formally, the TSP is defined on a complete graphG= (V, E), whereV={1,2, . . . , n}
+represents the set of cities (vertices) andE={(i, j) :i, j∈V, i̸=j}represents the set
+of edges. Each edge (i, j) is associated with a cost (distance)d ij.
+To satisfy the requirement for a rigorous optimization model, we define the problem
+using an **Integer Linear Programming (ILP)** formulation. This mathematical model
+provides the foundation upon which metaheuristics operate by defining the search space
+and feasibility constraints.
+2.1 Decision Variables
+We utilize binary decision variablesx ijto represent the selection of edges in the tour:
+xij=
+
+1 if the tour moves directly from cityito cityj
+0 otherwise(1)
+for alli, j∈V, wherei̸=j.
+1
+CSE480/591 - Optimization with Metaheuristics Yeditepe University
+2.2 Objective Function
+The objective is to minimize the total cost of the tour. The mathematical formulation is:
+MinimizeZ=nX
+i=1nX
+j=1,j̸=idijxij (2)
+Here,d ijrepresents the weight (distance or cost) of the edge between cityiand cityj.
+2.3 Constraints
+To ensure the solution forms a valid Hamiltonian cycle (a single tour visiting all cities),
+the following constraints must be satisfied. We present the constraints based on the
+integer programming formulations discussed in Benhida and Mir (2018).
+(i)Assignment Constraints (Degree Constraints):Each city must be entered
+exactly once and left exactly once.
+nX
+j=1,j̸=ixij= 1∀i∈V(Out-degree) (3)
+nX
+i=1,i̸=jxij= 1∀j∈V(In-degree) (4)
+(ii)Sub-tour Elimination Constraints (SECs):Constraints (i) alone allow for
+multiple disconnected loops (sub-tours). To prevent this, specific constraints are
+required. Literature provides different formulations for SECs, notably the Danzig-
+Fulkerson-Johnson (DFJ) and Miller-Tucker-Zemlin (MTZ) formulations (Benhida
+and Mir, 2018).
+Option A: DFJ Formulation (General Set-Based):The classical constraint
+requires that for any proper subset of citiesS, the tour cannot be closed withinS:
+X
+i∈SX
+j∈S,i̸=jxij≤ |S| −1∀S⊂V,2≤ |S| ≤n−1 (5)
+This formulation is mathematically strong but generates an exponential number of
+constraints.
+Option B: MTZ Formulation (Polynomial):Alternatively, Benhida and Mir
+(2018) highlight the Miller-Tucker-Zemlin (MTZ) formulation, which uses auxil-
+iary variablesu i(representing the order of visit) to eliminate sub-tours using a
+polynomial number of constraints (O(n2)):
+ui−uj+nx ij≤n−1∀i, j∈ {2, . . . , n}, i̸=j(6)
+2
+CSE480/591 - Optimization with Metaheuristics Yeditepe University
+1≤u i≤n−1∀i∈ {2, . . . , n}(7)
+This formulation is suitable for defining the problem in a compact optimization
+format.
+(iii)Integrality Constraints:
+xij∈ {0,1} ∀i, j(8)
+3. Dataset or Benchmark Instances
+To evaluate the proposed metaheuristic approach, we will use the standard **TSPLIB**
+benchmark library (Reinelt, 1991), which is the universally accepted dataset for compar-
+ing TSP algorithms.
+•Data Source:TSPLIB (University of Heidelberg).
+•Instance Selection:We plan to use a diverse set of instances to test scalability:
+–Small/Medium:eil51,berlin52,st70.
+–Large:ch130,pr152.
+•Format and Calculation:The instances typically provide 2D coordinates. Con-
+sistent with TSPLIB conventions, distances are calculated as rounded Euclidean
+distances:
+dij= nintq
+(xi−xj)2+ (y i−yj)2
+4. Example Scenario / Problem Instance
+To concretize the formal optimization model defined in Section 2, we present a small-scale,
+manually verifiable instance. This instance serves as a preliminary test bed to verify the
+implementation of the metaheuristic’s components.
+4.1 Instance Data
+We define a problem withn= 5 cities. Table 1 provides the Cartesian coordinates, which
+define the spatial layout of the cities.
+While the coordinates visualize the problem, themetaheuristic algorithm oper-
+ates on the edge weights. Therefore, we compute the full Symmetric Distance Matrix
+(Table 2) using Euclidean distances. This matrix represents thed ijcosts that the algo-
+rithm will query to calculate the fitness of any candidate solution.
+3
+CSE480/591 - Optimization with Metaheuristics Yeditepe University
+Table 1: Coordinates of the 5-city instance.
+City ID X-Coordinate Y-Coordinate
+1 0 0
+2 4 0
+3 4 3
+4 0 3
+5 2 1.5
+Table 2: Symmetric Distance Matrix (The Input for the Optimization Algorithm).
+1 2 3 4 5
+10.00 4.00 5.00 3.00 2.50
+24.00 0.00 3.00 5.00 2.50
+35.00 3.00 0.00 4.00 2.50
+43.00 5.00 4.00 0.00 2.50
+52.50 2.50 2.50 2.50 0.00
+4.2 Visual Representation
+The spatial configuration of the instance, including city coordinates and a potential opti-
+mal tour, is illustrated in Figure 1. The red arrows visualize the optimal path, with edge
+weights (distances) annotated on each segment.
+xy
+City 1 (0,0) City 2 (4,0)City 3 (4,3) City 4 (0,3)
+City 5 (2,1.5)
+2.5 2.53.04.0
+3.0
+Optimal Path
+Figure 1: Visual representation of the 5-city problem instance. The red path indicates
+an optimal tour (Total Cost = 15.0).
+4
+CSE480/591 - Optimization with Metaheuristics Yeditepe University
+4.3 Justification of the Instance
+This specific instance is chosen to be representative of the larger optimization challenges
+for three reasons:
+1.Clear Structure:It represents a standard fully connected graph with Euclidean
+distances, matching the TSPLIB format.
+2.Trap for Greedy Heuristics:The central node (City 5) is equidistant (d= 2.5)
+to all four corner cities. A simple Nearest Neighbor heuristic starting at City 1
+might choose City 5 first, but then be forced to jump to a corner (e.g., City 2)
+and traverse the perimeter, which might not always lead to the global optimum
+compared to strategies that plan the center visit more carefully.
+3.Verifiability:The optimal tour (e.g., 1→5→2→3→4→1) has a calculated
+cost of **15.0**. This allows us to strictly validate the correctness of the objective
+function calculation in the implementation phase before running the algorithm on
+larger, unknown datasets.
+5. Proposed Approach
+This section with its subsections belongs to the third progress of the term project... Do
+not consider now.
+5.1 Overview Design and/or General Algorithm
+5.2 Component 1 of Your Algorithm
+5.3 Component 2 of Your Algorithm
+6. Experimental Study
+This section with its subsections belongs to the fourth progress of the term project... Do
+not consider now.
+5
+CSE480/591 - Optimization with Metaheuristics Yeditepe University
+6.1 Experimental Setup
+6.1.1 Test Environment
+6.1.2 Parameter Setting
+6.2 Experimental Results
+7. Discussion and Conclusion
+This section belongs to the final report of the term project... Do not consider now.
+8. References
+References
+Benhida, S. and Mir, A. (2018). Generating subtour elimination constraints for the
+traveling salesman problem.IOSR Journal of Engineering (IOSRJEN), 8(7):17–21.
+Reinelt, G. (1991). Tsplib—a traveling salesman problem library.ORSA Journal on
+Computing, 3(4):376–384.
+Talbi, E.-G. (2009).Metaheuristics: From Design to Implementation. Wiley, Hoboken,
+NJ.
+6
+
+--- END OF CSE480_591_Project_Report_Template__2_ (3).pdf ---
+--- START OF CSE480_592_TP3.pdf ---
+CSE480/591 - Optimization with Metaheuristics Yeditepe University
+Term Project – Phase 3 Announcement
+Dear Students,
+You have completed Phase 1 (Problem Definition) and Phase 2 (Example Scenario /
+Problem Instance). You will now beginPhase 3 of the Term Project, where you
+will design, implement, and test a metaheuristic algorithm adapted to the optimization
+problem you selected earlier. This stage represents the core algorithmic work of your
+project and directly contributes to your final report and presentation.
+1. Selection of Metaheuristic Algorithm
+Each student must chooseoneof the following metaheuristic algorithms:
+•Simulated Annealing
+•Tabu Search
+•Advanced Hill Climbing (with intelligent improvements)
+•Iterated Local Search
+•Genetic Algorithm
+•Particle Swarm Algorithm
+•Ant Colony / Bee Colony Algorithm
+Important Rules:
+•If two students selected the same optimization problem, they may not choose the
+same metaheuristic unless their designs are significantly different.
+•Students choosing Genetic Algorithm must use different crossover/mutation oper-
+ators if more than one student picks GA.
+2. Data Structure and Fitness Function Implementation
+You must design and implement:
+•A representation of an individual solution (chromosome, state, permutation, vector,
+etc.)
+•A fitness/objective function for evaluating individuals
+Examples:
+•Graph Coloring: array of color assignments or array of vertices
+1
+CSE480/591 - Optimization with Metaheuristics Yeditepe University
+•Knapsack: binary vector of selected items
+•TSP: permutation of cities
+•Bin Packing: list of bins and assigned items
+•Job Shop Scheduling: operation sequences
+3. Implementation of the Metaheuristic Algorithm (Final Report
+Section 5)
+You may use any programming language (Python, C/C++, Java, MATLAB, etc.). Your
+implementation must include:
+•Initialization method
+•Neighborhood structure (if your algorithm is single solution-based) or operators
+(if your algorithm is population-based) such as crossover, mutation, perturbation,
+tabu rules, etc.
+•Selection/acceptance criteria
+•Update/evaluation loop
+•Stopping criteria (iterations, time, stagnation)
+4. Testing on the Example Scenario
+You must run your algorithm on the small-scale problem instance defined in Phase 2.
+Your algorithm should produce theexpected correct resultfor this small instance to
+confirm:
+•Fitness function works
+•Representation is correct
+•Algorithm logic is correct
+5. Experimental Setup (Final Report Section 6.1)
+You must report:
+•System Information (Final Report Section 6.1.1):CPU, RAM, operating
+system, programming language
+•Algorithm Parameters (Final Report Section 6.1.2):iteration count, mu-
+tation rate (if applicable), temperature schedule, tabu tenure, number of parti-
+cles/ants, time limit, population size etc.
+2
+CSE480/591 - Optimization with Metaheuristics Yeditepe University
+•Number of Runs:Each instance must be run5 times
+6. Experimental Results (Final Report Section 6.2)
+Prepare tables summarizing the performance of your algorithm (Check the lecture slides
+about the experimental study for JSSP):
+•Mean objective value
+•Best objective value
+•Standard deviation
+•Best computation time
+•Average computation time
+For example:
+Instance Mean Obj. Best Obj. Std. Dev. Mean Time (s) Best Time (s)
+Example 15.2 12 1.48 0.031 0.012
+7. Final Report Sections 5–6–7
+Fill in the following sections of the provided project template:
+•Section 5 – Experimental Setup
+•Section 6 – Experimental Results
+•Section 7 – Discussion and Conclusion
+Reports not compatible with the template will receive 0 points.Submit your
+report as aPDFfile only.
+8. Final Presentation
+A presentation template will be provided shortly. Your slides must include:
+•Outline
+•Problem Definition
+•General design of your algorithm
+•Problem instance and individual representation
+•Example run of your algorithm
+3
+CSE480/591 - Optimization with Metaheuristics Yeditepe University
+•Experimental setup
+•Experimental results
+Presentation time:8 minutes+2 minutes Q&A.
+Grading
+TP1 20%
+TP2 10%
+Final Report 40%
+Presentation 30%
+Submission Details
+•Submit on YULearn as a zip file which includes (TP3 Name Final.zip)
+•Final Report (a single PDF):TP3 Name Problem.pdf
+•Source code + readme/manual
+For any questions, you may contact:gterci@cse.yeditepe.edu.tr.
+4
+
+--- END OF CSE480_592_TP3.pdf ---
