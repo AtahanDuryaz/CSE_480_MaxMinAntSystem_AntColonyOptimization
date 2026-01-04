@@ -1,39 +1,12 @@
-"""
-Configuration Management Module
-================================
-Centralized parameter configuration for different TSP instances.
-
-Locked parameters:
-- α (alpha) = 1
-- β (beta) = 3
-- ρ (rho) = 0.1
-- max_iterations = 200
-- stagnation_limit = 20
-"""
-
-
 def get_config(instance_name):
     """
-    Get configuration parameters for a specific TSP instance.
-    
-    Args:
-        instance_name (str): Instance identifier
-            - 'validation': 5-city hardcoded validation
-            - 'test5': 5-city TSPLIB format test
-            - 'eil51': TSPLIB eil51 benchmark
-            
-    Returns:
-        dict: Configuration dictionary with keys:
-            - n_ants: Number of ants per iteration
-            - alpha: Pheromone importance (LOCKED: 1)
-            - beta: Heuristic importance (LOCKED: 3)
-            - rho: Evaporation rate (LOCKED: 0.1)
-            - max_iterations: Maximum iterations (LOCKED: 200)
-            - stagnation_limit: Stagnation counter limit (LOCKED: 20)
-            - round_result: Whether to apply NINT rounding to distances
-            - instance_path: Path to instance file (None for validation)
+    Merkezi Konfigürasyon Yönetimi
+    ------------------------------
+    - Sabit Parametreler: α=1, β=3, ρ=0.1, MaxIter=200
+    - Karınca Sayısı: n * 0.7 (Hesaplama verimliliği için)
     """
-    # Locked parameters (DO NOT CHANGE)
+    
+    # Kilitli Parametreler (Makale ve Proje Gereksinimi)
     ALPHA = 1
     BETA = 3
     RHO = 0.1
@@ -41,80 +14,124 @@ def get_config(instance_name):
     STAGNATION_LIMIT = 20
     
     configs = {
+        # --- ÖZEL TEST VE DOĞRULAMA SETLERİ (5 Şehir) ---
         'validation': {
             'n_ants': 5,
-            'alpha': ALPHA,
-            'beta': BETA,
-            'rho': RHO,
+            'alpha': ALPHA, 'beta': BETA, 'rho': RHO,
             'max_iterations': MAX_ITERATIONS,
             'stagnation_limit': STAGNATION_LIMIT,
-            'round_result': False,  # Floating-point distances
-            'instance_path': None,  # Uses hardcoded coordinates
-            'expected_optimum': None  # Unknown for validation
+            'round_result': False,  # Hassas hesaplama
+            'instance_path': None,  # Kod içindeki koordinatları kullanır
+            'expected_optimum': None
         },
-        
         'test5': {
             'n_ants': 5,
-            'alpha': ALPHA,
-            'beta': BETA,
-            'rho': RHO,
+            'alpha': ALPHA, 'beta': BETA, 'rho': RHO,
             'max_iterations': MAX_ITERATIONS,
             'stagnation_limit': STAGNATION_LIMIT,
-            'round_result': False,  # Floating-point distances
+            'round_result': False,
             'instance_path': 'benchmarks/small/test5.tsp',
-            'expected_optimum': None  # Unknown
+            'expected_optimum': None
         },
-        
+
+        # --- KÜÇÜK ÖLÇEKLİ TSPLIB BENCHMARK’LARI ---
         'eil51': {
-            'n_ants': 10,
-            'alpha': ALPHA,
-            'beta': BETA,
-            'rho': RHO,
+            'n_ants': 35, # 51 * 0.7
+            'alpha': ALPHA, 'beta': BETA, 'rho': RHO,
             'max_iterations': MAX_ITERATIONS,
             'stagnation_limit': STAGNATION_LIMIT,
-            'round_result': True,  # EUC_2D with NINT rounding
+            'round_result': True, # TSPLIB standardı: Tam sayı yuvarlama
             'instance_path': 'benchmarks/tsplib/eil51.tsp',
-            'expected_optimum': 426  # Known optimal tour length
-        },
-        'lin105': {
-            'n_ants': 105,
-            'alpha': ALPHA,
-            'beta': BETA,
-            'rho': RHO,
-            'max_iterations': MAX_ITERATIONS,
-            'stagnation_limit': STAGNATION_LIMIT,
-            'round_result': True,  # EUC_2D with NINT rounding
-            'instance_path': 'benchmarks/tsplib/lin105.tsp',
-            'expected_optimum': 14379  # Known optimal tour length
+            'expected_optimum': 426
         },
         'berlin52': {
-            'n_ants': 15,
-            'alpha': ALPHA,
-            'beta': BETA,
-            'rho': RHO,
+            'n_ants': 36, # 52 * 0.7
+            'alpha': ALPHA, 'beta': BETA, 'rho': RHO,
             'max_iterations': MAX_ITERATIONS,
             'stagnation_limit': STAGNATION_LIMIT,
-            'round_result': True,  # EUC_2D with NINT rounding
+            'round_result': True,
             'instance_path': 'benchmarks/tsplib/berlin52.tsp',
-            'expected_optimum': 7542  # Known optimal tour length
+            'expected_optimum': 7542
         },
-        'pr152': {
-            'n_ants': 107,
-            'alpha': ALPHA,
-            'beta': BETA,
-            'rho': RHO,
+        'st70': {
+            'n_ants': 49, # 70 * 0.7
+            'alpha': ALPHA, 'beta': BETA, 'rho': RHO,
             'max_iterations': MAX_ITERATIONS,
             'stagnation_limit': STAGNATION_LIMIT,
-            'round_result': True,  # EUC_2D with NINT rounding
-            'instance_path': 'benchmarks/tsplib/pr152.tsp',
-            'expected_optimum': 73542  # Known optimal tour length
-        }
-        
+            'round_result': True,
+            'instance_path': 'benchmarks/tsplib/st70.tsp',
+            'expected_optimum': 675
+        },
 
+        # --- ORTA ÖLÇEKLİ TSPLIB BENCHMARK’LARI ---
+        'pr76': {
+            'n_ants': 53, # 76 * 0.7
+            'alpha': ALPHA, 'beta': BETA, 'rho': RHO,
+            'max_iterations': MAX_ITERATIONS,
+            'stagnation_limit': STAGNATION_LIMIT,
+            'round_result': True,
+            'instance_path': 'benchmarks/tsplib/pr76.tsp',
+            'expected_optimum': 108159
+        },
+        'kroA100': {
+            'n_ants': 70, # 100 * 0.7
+            'alpha': ALPHA, 'beta': BETA, 'rho': RHO,
+            'max_iterations': MAX_ITERATIONS,
+            'stagnation_limit': STAGNATION_LIMIT,
+            'round_result': True,
+            'instance_path': 'benchmarks/tsplib/kroA100.tsp',
+            'expected_optimum': 21282
+        },
+        'lin105': {
+            'n_ants': 73, # 105 * 0.7
+            'alpha': ALPHA, 'beta': BETA, 'rho': RHO,
+            'max_iterations': MAX_ITERATIONS,
+            'stagnation_limit': STAGNATION_LIMIT,
+            'round_result': True,
+            'instance_path': 'benchmarks/tsplib/lin105.tsp',
+            'expected_optimum': 14379
+        },
+        'ch130': {
+            'n_ants': 91, # 130 * 0.7
+            'alpha': ALPHA, 'beta': BETA, 'rho': RHO,
+            'max_iterations': MAX_ITERATIONS,
+            'stagnation_limit': STAGNATION_LIMIT,
+            'round_result': True,
+            'instance_path': 'benchmarks/tsplib/ch130.tsp',
+            'expected_optimum': 6110
+        },
+
+        # --- BÜYÜK ÖLÇEKLİ TSPLIB BENCHMARK’LARI ---
+        'pr152': {
+            'n_ants': 106, # 152 * 0.7
+            'alpha': ALPHA, 'beta': BETA, 'rho': RHO,
+            'max_iterations': MAX_ITERATIONS,
+            'stagnation_limit': STAGNATION_LIMIT,
+            'round_result': True,
+            'instance_path': 'benchmarks/tsplib/pr152.tsp',
+            'expected_optimum': 73542
+        },
+        'rat195': {
+            'n_ants': 136, # 195 * 0.7
+            'alpha': ALPHA, 'beta': BETA, 'rho': RHO,
+            'max_iterations': MAX_ITERATIONS,
+            'stagnation_limit': STAGNATION_LIMIT,
+            'round_result': True,
+            'instance_path': 'benchmarks/tsplib/rat195.tsp',
+            'expected_optimum': 2323
+        },
+        'lin318': {
+            'n_ants': 222, # 318 * 0.7
+            'alpha': ALPHA, 'beta': BETA, 'rho': RHO,
+            'max_iterations': MAX_ITERATIONS,
+            'stagnation_limit': STAGNATION_LIMIT,
+            'round_result': True,
+            'instance_path': 'benchmarks/tsplib/lin318.tsp',
+            'expected_optimum': 42029
+        }
     }
     
     if instance_name not in configs:
-        raise ValueError(f"Unknown instance: {instance_name}. "
-                        f"Available: {list(configs.keys())}")
+        raise ValueError(f"Bilinmeyen örnek (instance): {instance_name}")
     
     return configs[instance_name]
