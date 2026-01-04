@@ -148,7 +148,7 @@ Where:
 
 1. **Clone the repository**
 ```bash
-git clone <repository-url>
+git clone https://github.com/AtahanDuryaz/CSE_480_MaxMinAntSystem_AntColonyOptimization
 cd 480_Term_Project
 ```
 
